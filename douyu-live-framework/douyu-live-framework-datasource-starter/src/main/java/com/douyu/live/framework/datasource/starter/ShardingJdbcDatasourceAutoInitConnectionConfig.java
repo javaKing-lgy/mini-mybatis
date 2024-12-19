@@ -12,7 +12,7 @@ import java.sql.Connection;
 /**
  * 做成配置，实现通过参数来触发 Hikari数据源的初始化
  *
- * @author luiguanyi
+ * @author  luiguanyi
  * * @date 2024/12/19
  */
 @Configuration
