@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>douyu-live-framework-datasource-starter</module>
+        <module>douyu-live-framework-redis-starter</module>
     </modules>
 
     <properties>
