@@ -1,0 +1,6 @@
+dubbo:
+  application:
+    name: douyu-live-api
+    qos-enable: false
+  registry:
+    address: nacos://127.0.0.1:8848?namespace=douyu-live-test&&username=nacos&&password=nacos
