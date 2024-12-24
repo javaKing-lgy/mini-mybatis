@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <curator.version>2.12.0</curator.version>
         <mybatis.version>3.5.1</mybatis.version>
+        <rocketmq.client.version>4.8.0</rocketmq.client.version>
         <druid.version>1.1.20</druid.version>
         <sharding.jdbc.version>5.3.2</sharding.jdbc.version>
         <hessian.version>4.0.38</hessian.version>
@@ -31,6 +32,12 @@
             <artifactId>dubbo-spring-boot-starter</artifactId>
             <version>3.2.0-beta.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+            <version>${rocketmq.client.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
@@ -82,6 +89,7 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.3</version>
         </dependency>
+
 
     </dependencies>
     <build>
