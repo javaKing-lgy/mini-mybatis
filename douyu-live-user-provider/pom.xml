@@ -57,6 +57,14 @@
             <artifactId>douyu-live-framework-datasource-starter</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+        </dependency>
+
         <dependency>
             <groupId>com.douyu</groupId>
             <artifactId>douyu-live-user-interface</artifactId>
