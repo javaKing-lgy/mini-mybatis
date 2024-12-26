@@ -2,13 +2,13 @@ dataSources:
   user_master: ##新表，重建的分表
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://127.0.0.1:3306/qiyu_live_user?useUnicode=true&characterEncoding=utf8
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/douyu_live_user?useUnicode=true&characterEncoding=utf8
     username: root
     password: root
   user_slave0: ##新表，重建的分表
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://127.0.0.1:3309/qiyu_live_user?useUnicode=true&characterEncoding=utf8
+    jdbcUrl: jdbc:mysql://127.0.0.1:3309/douyu_live_user?useUnicode=true&characterEncoding=utf8
     username: root
     password: root
 rules:
