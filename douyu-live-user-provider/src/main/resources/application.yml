@@ -5,7 +5,7 @@ spring:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     url: jdbc:shardingsphere:classpath:douyu-db-sharding.yaml
     hikari:
-      pool-name: qiyu-user-pool
+      pool-name: douyu-user-pool
       minimum-idle: 150
       maximum-pool-size: 300
       connection-timeout: 4000
