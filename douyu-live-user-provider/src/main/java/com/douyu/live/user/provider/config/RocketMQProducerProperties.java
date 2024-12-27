@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
  * @author luiguanyi
  * * @date 2024/12/25
  */
-@ConfigurationProperties(prefix="qiyu.rmq.producer")
+@ConfigurationProperties(prefix="douyu.mq.producer")
 @Configuration
 @Data
 public class RocketMQProducerProperties {
