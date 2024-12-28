@@ -34,7 +34,7 @@ public class RocketMQConsumerConfig implements InitializingBean {
     private UserProviderCacheKeyBuilder userProviderCacheKeyBuilder;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         initConsumer();
     }
 

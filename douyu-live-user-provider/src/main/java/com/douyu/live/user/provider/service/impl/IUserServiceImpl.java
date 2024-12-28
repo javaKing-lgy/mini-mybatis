@@ -89,18 +89,21 @@ public class IUserServiceImpl implements IUserService {
         // key list 为 redis 中含有的数据
         List<String> keyList = new ArrayList<>();
         // 先查询redis中的含有的数据
-        userIdList.forEach(userId -> {
-            keyList.add(userProviderCacheKeyBuilder.buildUserInfoKey(userId));
-        });
+        userIdList.forEach(userId -> keyList.add(userProviderCacheKeyBuilder.buildUserInfoKey(userId)));
         // 在这里我们先要过滤出来自redis中为null的数据 之后我们就要就要查询redis中没有的数据了 如果 在redis中都查询到了我们就可以直接返回了
         List<UserDTO> userDTOList = redisTemplate.opsForValue().multiGet(keyList).stream().filter(Objects::nonNull).collect(Collectors.toList());
         if(!CollectionUtils.isEmpty(userDTOList)&& userDTOList.size() == userIdList.size()){
             return userDTOList.stream().collect(Collectors.toMap(UserDTO::getUserId, userDTO -> userDTO));
         }
-        // 查询出在redis中的userid
-        List<Long> userIdInCacheList = userDTOList.stream().map(UserDTO::getUserId).collect(Collectors.toList());
-        // 进行剔除
-        List<Long> userIdNotInCacheList = userIdList.stream().filter(x -> !userIdInCacheList.contains(x)).collect(Collectors.toList());
+        List<Long> userIdNotInCacheList;
+        if (!CollectionUtils.isEmpty(userDTOList)) {
+            // 查询出在redis中的userid
+            List<Long> userIdInCacheList = userDTOList.stream().map(UserDTO::getUserId).collect(Collectors.toList());
+            // 进行剔除
+            userIdNotInCacheList = userIdList.stream().filter(x -> !userIdInCacheList.contains(x)).collect(Collectors.toList());
+        }else{
+            userIdNotInCacheList = userIdList;
+        }
         // 如果这个list不为null 我们就去查询数据库
         // 下面这种写法 我不建议 因为如果我们对数据库进行分表之后 这样他会遍历所有的表 之后进行union all 这样会非常消耗性能
 //        if(!CollectionUtils.isEmpty(userIdNotInCacheList)){
@@ -113,9 +116,7 @@ public class IUserServiceImpl implements IUserService {
         // 我更建议这种写法 使用多线程查询 替换掉 union all 这里使用100 是因为我分成了100 张表
         Map<Long, List<Long>> map = userIdNotInCacheList.stream().collect(Collectors.groupingBy(userid -> userid % 100));
         List<UserDTO> dbQueryResult = new CopyOnWriteArrayList<>();
-        map.values().parallelStream().forEach(list -> {
-            dbQueryResult.addAll(ConvertBeanUtils.convertList(userMapper.selectBatchIds(list), UserDTO.class));
-        });
+        map.values().parallelStream().forEach(list -> dbQueryResult.addAll(ConvertBeanUtils.convertList(userMapper.selectBatchIds(list), UserDTO.class)));
         // 将新查询的结果放入到redis中
         if (!CollectionUtils.isEmpty(dbQueryResult)){
             Map<String, UserDTO> collect = dbQueryResult.stream().collect(Collectors.toMap(userDTO -> userProviderCacheKeyBuilder.buildUserInfoKey(userDTO.getUserId()), x -> x));
@@ -137,7 +138,7 @@ public class IUserServiceImpl implements IUserService {
 
     /**
      * 随机生成过期时间
-     * @return
+     * @return int
      */
     private int createRandomExpireTime(){
         int time = ThreadLocalRandom.current().nextInt(1000);
