@@ -1,20 +1,24 @@
 package com.douyu.live.user.provider.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.douyu.live.common.interfaces.utils.ConvertBeanUtils;
 import com.douyu.live.framework.redis.starter.key.UserProviderCacheKeyBuilder;
 import com.douyu.live.user.dto.UserDTO;
+import com.douyu.live.user.provider.constant.TopicEnum;
 import com.douyu.live.user.provider.dao.mapper.UserMapper;
 import com.douyu.live.user.provider.dao.po.UserPO;
 import com.douyu.live.user.provider.service.IUserService;
 import com.google.common.collect.Maps;
 import jakarta.annotation.Resource;
+import lombok.extern.log4j.Log4j;
+import org.apache.rocketmq.client.producer.MQProducer;
+import org.apache.rocketmq.common.message.Message;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,9 +26,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
+ * 用户service层实现类
  * @author luiguanyi
  * * @date 2024/12/16
  */
+@Log4j
 @Service
 public class IUserServiceImpl implements IUserService {
     @Resource
@@ -33,6 +39,8 @@ public class IUserServiceImpl implements IUserService {
     private RedisTemplate<String,UserDTO> redisTemplate;
     @Resource
     private UserProviderCacheKeyBuilder userProviderCacheKeyBuilder;
+    @Resource
+    private MQProducer mqProducer;
 
     @Override
     public UserDTO getByUserId(Long userId) {
@@ -57,6 +65,9 @@ public class IUserServiceImpl implements IUserService {
             return  false;
         }
         userMapper.updateById(ConvertBeanUtils.convert(userDTO, UserPO.class));
+        // 使用延迟双删解决缓存一致性
+        redisTemplate.delete(userProviderCacheKeyBuilder.buildUserInfoKey(userDTO.getUserId()));
+        sendMessageWithDelay(userDTO);
         return true;
     }
 
@@ -124,8 +135,28 @@ public class IUserServiceImpl implements IUserService {
         return userDTOList.stream().collect(Collectors.toMap(UserDTO::getUserId,x -> x));
     }
 
+    /**
+     * 随机生成过期时间
+     * @return
+     */
     private int createRandomExpireTime(){
         int time = ThreadLocalRandom.current().nextInt(1000);
         return time+ 60 * 30;
+    }
+    /**
+     * 使用延迟双删解决缓存一致性
+     * @param userDTO
+     */
+    public void sendMessageWithDelay(UserDTO userDTO) {
+        try {
+            Message message = new Message();
+            message.setBody(JSON.toJSONString(userDTO).getBytes());
+            message.setTopic(TopicEnum.USER_UPDATE_CACHE.getTopic());
+            // 延迟级别 设置成一秒发送
+            message.setDelayTimeLevel(1);
+            mqProducer.send(message);
+        } catch (Exception e) {
+            log.error("mq发送消息失败");
+        }
     }
 }
