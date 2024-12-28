@@ -5,21 +5,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * mq生产者配置
+ *  rocketmq 消费者配置
  * @author luiguanyi
- * * @date 2024/12/25
+ * * @date 2024/12/28
  */
-@ConfigurationProperties(prefix="douyu.rmq.producer")
+@ConfigurationProperties(prefix="douyu.rmq.consumer")
 @Configuration
 @Data
-public class RocketMQProducerProperties {
+public class RocketMQConsumerProperties {
     //rocketmq 的nameSever 地址
     private String nameSrv;
     //分组名称
     private String groupName;
-    //消息重发次数
-    private int retryTimes;
-    //发送超时时间
-    private int sendTimeOut;
-
 }
