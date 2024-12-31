@@ -14,6 +14,8 @@
         <module>douyu-live-api</module>
         <module>douyu-live-common-interface</module>
         <module>douyu-live-framework</module>
+        <module>douyu-live-id-generate-interface</module>
+        <module>douyu-live-id-generate-provider</module>
     </modules>
 
     <properties>
