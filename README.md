@@ -1,4 +1,5 @@
 # douyu-live-app
+## 新年快乐 2025 
 ## 项目说明
 
 一个基于Spring Cloud Alibaba 、Nacos、Mysql、Redis、RocketMQ、Netty、Dubbo、MyBatis-Plus、ShardingJdbc、Caffeine、Apollo的微服务直播平台，分成 主播端，客户端，管理端。采用主流的互联网技术架构、全新的UI设计、支持集群部署、服务注册和发现等。
