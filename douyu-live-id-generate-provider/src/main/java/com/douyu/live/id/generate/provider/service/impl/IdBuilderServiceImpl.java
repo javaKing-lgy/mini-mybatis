@@ -90,6 +90,11 @@ public class IdBuilderServiceImpl implements IdBuilderService {
         return returnId;
     }
 
+    /**
+     * 刷新本地无序id段
+     *
+     * @param localUnSeqIdBO
+     */
     private void refreshLocalUnSeqIdMap(LocalUnSeqIdBO localUnSeqIdBO) {
         long begin = localUnSeqIdBO.getCurrentStart();
         long end = localUnSeqIdBO.getNextThreshold();
@@ -229,6 +234,4 @@ public class IdBuilderServiceImpl implements IdBuilderService {
         }
     }
 
-    private void test() {
-    }
 }
