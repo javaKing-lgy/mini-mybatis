@@ -25,13 +25,15 @@ public class IdGenerateApplication implements CommandLineRunner {
         springApplication.setWebApplicationType(WebApplicationType.NONE);
         springApplication.run(args);
     }
+
     @Override
     public void run(String... args) throws Exception {
-        for (int i = 0; i < 100; i++) {
-            System.out.println(idBuilderService.getSeqId(1));
-//            if(i == 49){
-//                Thread.sleep(200);
-//            }
-        }
+//        HashSet<Long> idSet = new HashSet<>();
+//        for (int i = 0; i < 1700; i++) {
+//            Long unSeqId = idBuilderService.getUnSeqId(1);
+//            System.out.println(unSeqId);
+//            idSet.add(unSeqId);
+//        }
+//        System.out.println(idSet.size());
     }
 }

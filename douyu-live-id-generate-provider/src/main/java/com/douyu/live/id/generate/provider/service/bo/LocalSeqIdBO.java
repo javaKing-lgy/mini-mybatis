@@ -5,7 +5,8 @@ import lombok.Data;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 本地id生成的一个具体策略
+ * 本地id生成的一个具体策略 有序id
+ *
  * @author luiguanyi
  * * @date 2024/12/29
  */
