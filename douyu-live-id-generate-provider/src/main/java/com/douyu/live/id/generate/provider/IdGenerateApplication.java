@@ -27,7 +27,7 @@ public class IdGenerateApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args){
 //        HashSet<Long> idSet = new HashSet<>();
 //        for (int i = 0; i < 1700; i++) {
 //            Long unSeqId = idBuilderService.getUnSeqId(1);
