@@ -13,13 +13,32 @@ import java.util.concurrent.atomic.AtomicLong;
 public class LocalSeqIdBO {
 
     /**
-     * 业务ID
+     * mysql中对应的策略id
      */
-    private int id;
-
+    private Integer id;
 
     /**
-     * 在内存中记录的当前的值
+     * 策略描述
      */
-    private AtomicLong currentNum;
+    private String desc;
+
+    /**
+     * 本地内存记录当前id值
+     */
+    private AtomicLong currentValue;
+
+    /**
+     * 本地内存记录id段的开始位置
+     */
+    private Long currentStart;
+
+    /**
+     * 本地内存记录id段的结束位置
+     */
+    private Long nextThreshold;
+
+    /**
+     * 步长
+     */
+    private Integer step;
 }

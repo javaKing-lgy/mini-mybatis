@@ -16,3 +16,6 @@ dubbo:
   protocol:
     name: dubbo
     port: 9098
+
+localId:
+  update: 0.75

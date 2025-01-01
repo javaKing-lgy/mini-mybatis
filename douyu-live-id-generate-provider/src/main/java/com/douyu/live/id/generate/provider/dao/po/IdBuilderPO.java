@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
 import java.util.Date;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Date;
  * @author luiguanyi
  * * @date 2024/12/31
  */
-@TableName("t_id_builder_config")
+@TableName("t_id_generate_config")
 @Data
 public class IdBuilderPO {
     @TableId(type = IdType.AUTO)
