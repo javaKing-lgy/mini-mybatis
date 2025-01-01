@@ -5,7 +5,7 @@ package com.douyu.live.id.generate.provider.service;
  * @author luiguanyi
  * * @date 2024/12/29
  */
-public interface IdGenerateService {
+public interface IdBuilderService {
     /**
      * 生成有序id
      *
