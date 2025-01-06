@@ -2,8 +2,9 @@ package com.douyu.live.user.provider.config;
 
 import com.alibaba.fastjson.JSON;
 import com.douyu.live.framework.redis.starter.key.UserProviderCacheKeyBuilder;
-import com.douyu.live.user.dto.UserDTO;
-import com.douyu.live.user.provider.constant.TopicEnum;
+import com.douyu.live.user.constants.CacheAsyncDeleteCode;
+import com.douyu.live.user.constants.TopicEnum;
+import com.douyu.live.user.dto.UserCacheAsyncDeleteDTO;
 import jakarta.annotation.Resource;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -49,13 +50,14 @@ public class RocketMQConsumerConfig implements InitializingBean {
             defaultMQPushConsumer.subscribe(TopicEnum.USER_UPDATE_CACHE.getTopic(), "*");
             defaultMQPushConsumer.setMessageListener((MessageListenerConcurrently) (message, context) -> {
                 String msgStr = new String(message.get(0).getBody());
-                UserDTO userDTO = JSON.parseObject(msgStr, UserDTO.class);
-                if (userDTO == null || userDTO.getUserId() == null) {
-                    LOGGER.error("用户id为空，参数异常，内容: {} ", msgStr);
-                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                UserCacheAsyncDeleteDTO userDTO = JSON.parseObject(msgStr, UserCacheAsyncDeleteDTO.class);
+                if (userDTO.getCode().equals(CacheAsyncDeleteCode.USER_INFO_DELETE.getCode())) {
+                    Long userId = JSON.parseObject(userDTO.getMsg()).getLong("userId");
+                    redisTemplate.delete(userProviderCacheKeyBuilder.buildUserInfoKey(userId));
+                } else if (userDTO.getCode().equals(CacheAsyncDeleteCode.USER_TAG_DELETE.getCode())) {
+                    Long userId = JSON.parseObject(userDTO.getMsg()).getLong("userId");
+                    redisTemplate.delete(userProviderCacheKeyBuilder.buildUserTagKey(userId));
                 }
-                //延迟消息的回调，处理相关的缓存二次删除
-                redisTemplate.delete(userProviderCacheKeyBuilder.buildUserInfoKey(userDTO.getUserId()));
                 LOGGER.error("延迟删除处理，userDTO is {}", userDTO);
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             });

@@ -29,10 +29,23 @@ rules:
           standard:
             shardingColumn: user_id
             shardingAlgorithmName: t_user-inline
+      t_user_tag:
+        actualDataNodes: user_ds.t_user_tag_${(0..99).collect(){ it.toString().padLeft(2,'0') } }
+        tableStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: t_user_tag-inline
+
+
     shardingAlgorithms:
       t_user-inline:
         type: INLINE
         props:
           algorithm-expression: t_user_${(user_id %100).toString().padLeft(2,'0')}
+      t_user_tag-inline:
+        type: INLINE
+        props:
+          algorithm-expression: t_user_tag_${(user_id %100).toString().padLeft(2,'0')}
+
 props:
   sql-show: true

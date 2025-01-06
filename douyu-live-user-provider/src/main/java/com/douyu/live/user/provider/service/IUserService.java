@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 用户服务
  * @author luiguanyi
  * * @date 2024/12/16
  */
@@ -16,8 +17,23 @@ public interface IUserService {
      * @param userId
      * @return
      */
-    public UserDTO getByUserId(Long userId);
-    public boolean updateUserInfo(UserDTO userDTO);
-    public boolean insertOne(UserDTO userDTO);
-    public Map<Long, UserDTO> batchQueryUserInfo(List<Long> userIds);
+    UserDTO getByUserId(Long userId);
+    /**
+     * 更新用户信息
+     * @param userDTO
+     * @return
+     */
+    boolean updateUserInfo(UserDTO userDTO);
+    /**
+     * 插入用户信息
+     * @param userDTO
+     * @return
+     */
+    boolean insertOne(UserDTO userDTO);
+    /**
+     * 批量查询用户信息
+     * @param userIds
+     * @return
+     */
+    Map<Long, UserDTO> batchQueryUserInfo(List<Long> userIds);
 }
