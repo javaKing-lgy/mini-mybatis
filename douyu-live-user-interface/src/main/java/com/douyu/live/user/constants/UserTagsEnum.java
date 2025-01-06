@@ -3,6 +3,7 @@ package com.douyu.live.user.constants;
 import lombok.Getter;
 
 /**
+ * 用户标签枚举
  * @author liuguanyi
  * * @date 2025/1/3
  */

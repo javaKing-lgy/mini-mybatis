@@ -3,8 +3,10 @@ package com.douyu.live.user.provider.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.douyu.live.common.interfaces.utils.ConvertBeanUtils;
 import com.douyu.live.framework.redis.starter.key.UserProviderCacheKeyBuilder;
+import com.douyu.live.user.constants.CacheAsyncDeleteCode;
+import com.douyu.live.user.dto.UserCacheAsyncDeleteDTO;
 import com.douyu.live.user.dto.UserDTO;
-import com.douyu.live.user.provider.constant.TopicEnum;
+import com.douyu.live.user.constants.TopicEnum;
 import com.douyu.live.user.provider.dao.mapper.UserMapper;
 import com.douyu.live.user.provider.dao.po.UserPO;
 import com.douyu.live.user.provider.service.IUserService;
@@ -41,6 +43,7 @@ public class IUserServiceImpl implements IUserService {
     private UserProviderCacheKeyBuilder userProviderCacheKeyBuilder;
     @Resource
     private MQProducer mqProducer;
+
 
     @Override
     public UserDTO getByUserId(Long userId) {
@@ -150,10 +153,14 @@ public class IUserServiceImpl implements IUserService {
      */
     public void sendMessageWithDelay(UserDTO userDTO) {
         try {
+            UserCacheAsyncDeleteDTO dto = new UserCacheAsyncDeleteDTO();
+            dto.setCode(CacheAsyncDeleteCode.USER_INFO_DELETE.getCode());
+            Map<String, Object> map = new HashMap<>();
+            map.put("userId", userDTO.getUserId());
+            dto.setMsg(JSON.toJSONString(map));
             Message message = new Message();
-            message.setBody(JSON.toJSONString(userDTO).getBytes());
             message.setTopic(TopicEnum.USER_UPDATE_CACHE.getTopic());
-            // 延迟级别 设置成一秒发送
+            message.setBody(JSON.toJSONString(dto).getBytes());
             message.setDelayTimeLevel(1);
             mqProducer.send(message);
         } catch (Exception e) {

@@ -1,4 +1,4 @@
-package com.douyu.live.user.provider.constant;
+package com.douyu.live.user.constants;
 
 import lombok.Getter;
 
@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 @Getter
 public enum TopicEnum {
-    USER_UPDATE_CACHE("user-update-cache");
+    USER_UPDATE_CACHE("UserCacheAsyncDelete");
 
     private final String topic;
 
