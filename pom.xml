@@ -9,13 +9,10 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>douyu-live-user-interface</module>
-        <module>douyu-live-user-provider</module>
-        <module>douyu-live-api</module>
-        <module>douyu-live-common-interface</module>
+        <module>douyu-live-common</module>
         <module>douyu-live-framework</module>
-        <module>douyu-live-id-generate-interface</module>
-        <module>douyu-live-id-generate-provider</module>
+        <module>douyu-live-user</module>
+        <module>douyu-live-id</module>
     </modules>
 
     <properties>
