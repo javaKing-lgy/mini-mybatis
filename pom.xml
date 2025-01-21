@@ -8,13 +8,6 @@
     <artifactId>douyu-live-app</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <modules>
-        <module>douyu-live-common</module>
-        <module>douyu-live-framework</module>
-        <module>douyu-live-user</module>
-        <module>douyu-live-id</module>
-    </modules>
-
     <properties>
         <qiyu-mysql.version>8.0.28</qiyu-mysql.version>
         <maven.compiler.source>17</maven.compiler.source>
