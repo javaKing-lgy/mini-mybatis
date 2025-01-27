@@ -1,6 +1,7 @@
-# douyu-live-app
+# 手写MyBatis ORM 框架
 ## 项目说明
-
+从零到一手写一个MyBatis ORM框架。
+从中体会MyBatis的实现的过程。
 
 ## 前言
 
