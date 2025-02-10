@@ -1,8 +1,9 @@
 package cn.lgyjava.mybatis.binding;
 
 
-import cn.lgyjava.mybatis.session.SqlSession;
 import cn.hutool.core.lang.ClassScanner;
+import cn.lgyjava.mybatis.session.Configuration;
+import cn.lgyjava.mybatis.session.SqlSession;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,10 @@ import java.util.Set;
  * @Date 2025/1/26 上午10:57
  **/
 public class MapperRegistry {
+	private Configuration config;
+	public MapperRegistry(Configuration config) {
+		this.config = config;
+	}
 
 	// 将已经添加的映射器代理
 	private final Map<Class<?>,MapperProxyFactory<?>> knownMappers = new HashMap<>();

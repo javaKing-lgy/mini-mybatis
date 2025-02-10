@@ -2,7 +2,7 @@ package cn.lgyjava.mybatis.session;
 
 /**
  * 在 SqlSession 中定义用来执行SQL 获取映射器对象以及后续管理事务操作的标准接口。
- * 目前这个接口中对于数据库的操作仅仅只提供了 selectOne 后续还会有相应其他方法的定义
+ * 通常情况下 我们应用程序中使用 的 MyBatis 的api 就是在这个接口定义的方法
  *
  * @Author liuguanyi
  * @Date 2025/1/26 上午10:57
@@ -40,5 +40,11 @@ public interface SqlSession {
 	 * @return a mapper bound to this SqlSession
 	 */
 	<T> T getMapper(Class<T> type);
+	/**
+	 * Retrieves current configuration
+	 * 得到配置
+	 * @return Configuration
+	 */
+	Configuration getConfiguration();
 
 }

@@ -1,13 +1,16 @@
 package cn.lgyjava.mybatis.test;
 
-import cn.lgyjava.mybatis.binding.MapperRegistry;
+import cn.lgyjava.mybatis.io.Resources;
 import cn.lgyjava.mybatis.session.SqlSession;
 import cn.lgyjava.mybatis.session.SqlSessionFactory;
-import cn.lgyjava.mybatis.session.defaults.DefaultSqlSessionFactory;
+import cn.lgyjava.mybatis.session.SqlSessionFactoryBuilder;
 import cn.lgyjava.mybatis.test.dao.IUserDao;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Reader;
 
 /**
  * @Author liuguanyi
@@ -23,19 +26,16 @@ public class CjTest {
 	 之后通过SqlSession获取对应的DAO类型的实现类，并且进行方法验证。
 	 */
 	@Test
-	public void test_MapperProxyFactory(){
-		// 1. 注册Mapper
-		MapperRegistry registry = new MapperRegistry();
-		registry.addMappers("cn.bugstack.mybatis.test.dao");
-		// 2. 从 SqlSession 工厂获取 Session
-		SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(registry);
+	public void test_MapperProxyFactory() throws IOException {
+		// 从SqlSessionFactory中获取SqlSession
+		Reader reader = Resources.getResourceAsReader("mybatis-config-datasource.xml");
+		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		SqlSession sqlSession = sqlSessionFactory.openSession();
-		// 3. 获取映射器对象
+		// 获取映射器的对象
 		IUserDao userDao = sqlSession.getMapper(IUserDao.class);
-		// 4. 测试验证
-		String res = userDao.queryUserName("10001");
+		// 测试验证
+		String res = userDao.queryUserInfoById("10001");
 		logger.info("测试结果：{}", res);
-
 	}
 
 }
