@@ -1,8 +1,15 @@
 package cn.lgyjava.mybatis.session.defaults;
 
+import cn.lgyjava.mybatis.executor.Executor;
+import cn.lgyjava.mybatis.mapping.Environment;
 import cn.lgyjava.mybatis.session.Configuration;
 import cn.lgyjava.mybatis.session.SqlSession;
 import cn.lgyjava.mybatis.session.SqlSessionFactory;
+import cn.lgyjava.mybatis.session.TransactionIsolationLevel;
+import cn.lgyjava.mybatis.transaction.Transaction;
+import cn.lgyjava.mybatis.transaction.TransactionFactory;
+
+import java.sql.SQLException;
 
 /**
  * 默认的简单工厂实现 ，处理开启SqlSession时 对DefaultSqlSession的创建
@@ -21,7 +28,23 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
 	@Override
 	public SqlSession openSession() {
-		return new DefaultSqlSession(configuration);
+		Transaction tx = null;
+		try {
+			final Environment environment = configuration.getEnvironment();
+			TransactionFactory transactionFactory = environment.getTransactionFactory();
+			tx = transactionFactory.newTransaction(configuration.getEnvironment().getDataSource(), TransactionIsolationLevel.READ_COMMITTED, false);
+			// 创建执行器
+			Executor executor = configuration.newExecutor(tx);
+			return new DefaultSqlSession(configuration, executor);
+		} catch (Exception e) {
+			try {
+				assert tx != null;
+				tx.close();
+			} catch (SQLException e1) {
+				//ignore
+			}
+			throw new RuntimeException("Error opening session.  Cause: " + e);
+		}
 	}
 
 }

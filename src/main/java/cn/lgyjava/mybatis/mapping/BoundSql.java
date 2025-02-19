@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * 绑定的SQL 从SqlSource解析出来，将所有动态内容都处理完成的得到的SQL语句
- * 其中还有？以及映射参数
+ *
  * @author liuguanyi
  * * @date 2025/2/18
  */
