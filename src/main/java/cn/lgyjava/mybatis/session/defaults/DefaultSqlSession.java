@@ -1,5 +1,6 @@
 package cn.lgyjava.mybatis.session.defaults;
 
+import cn.lgyjava.mybatis.executor.Executor;
 import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.Environment;
 import cn.lgyjava.mybatis.mapping.MappedStatement;
@@ -21,8 +22,11 @@ public class DefaultSqlSession implements SqlSession {
 
 	private Configuration configuration;
 
-	public DefaultSqlSession(Configuration configuration) {
+	private Executor executor;
+
+	public DefaultSqlSession(Configuration configuration, Executor executor) {
 		this.configuration = configuration;
+		this.executor = executor;
 	}
 
 	@Override
