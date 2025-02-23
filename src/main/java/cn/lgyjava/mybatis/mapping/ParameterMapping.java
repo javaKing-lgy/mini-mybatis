@@ -41,6 +41,9 @@ public class ParameterMapping {
             parameterMapping.jdbcType = jdbcType;
             return this;
         }
+        public ParameterMapping build() {
+            return parameterMapping;
+        }
 
     }
 
