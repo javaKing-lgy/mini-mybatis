@@ -1,6 +1,6 @@
 package cn.lgyjava.mybatis.session;
 
-import cn.lgyjava.mybatis.builder.xml.XMLConfigBuilder.XMLConfigBuilder;
+import cn.lgyjava.mybatis.builder.xml.XMLConfigBuilder;
 import cn.lgyjava.mybatis.session.defaults.DefaultSqlSessionFactory;
 
 import java.io.Reader;

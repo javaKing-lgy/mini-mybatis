@@ -1,5 +1,10 @@
 package cn.lgyjava.mybatis.mapping;
 
+import cn.lgyjava.mybatis.reflection.MetaObject;
+import cn.lgyjava.mybatis.session.Configuration;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -9,35 +14,42 @@ import java.util.Map;
  * * @date 2025/2/18
  */
 public class BoundSql {
-    // 最终要执行的SQL
     private String sql;
-    // 参数映射
-    private Map<Integer, String> parameterMappings;
-    // 入参类型
-    private String parameterType;
-    // 返回类型
-    private String resultType;
+    private List<ParameterMapping> parameterMappings;
+    private Object parameterObject;
+    private Map<String, Object> additionalParameters;
+    private MetaObject metaParameters;
 
-    public BoundSql(String sql, Map<Integer, String> parameterMappings, String parameterType, String resultType) {
+    public BoundSql(Configuration configuration, String sql, List<ParameterMapping> parameterMappings, Object parameterObject) {
         this.sql = sql;
         this.parameterMappings = parameterMappings;
-        this.parameterType = parameterType;
-        this.resultType = resultType;
+        this.parameterObject = parameterObject;
+        this.additionalParameters = new HashMap<>();
+        this.metaParameters = configuration.newMetaObject(additionalParameters);
     }
 
     public String getSql() {
         return sql;
     }
 
-    public Map<Integer, String> getParameterMappings() {
+    public List<ParameterMapping> getParameterMappings() {
         return parameterMappings;
     }
 
-    public String getParameterType() {
-        return parameterType;
+    public Object getParameterObject() {
+        return parameterObject;
     }
 
-    public String getResultType() {
-        return resultType;
+    public boolean hasAdditionalParameter(String name) {
+        return metaParameters.hasGetter(name);
     }
+
+    public void setAdditionalParameter(String name, Object value) {
+        metaParameters.setValue(name, value);
+    }
+
+    public Object getAdditionalParameter(String name) {
+        return metaParameters.getValue(name);
+    }
+
 }
