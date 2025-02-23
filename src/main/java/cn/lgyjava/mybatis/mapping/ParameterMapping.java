@@ -26,9 +26,10 @@ public class ParameterMapping {
 
         private ParameterMapping parameterMapping = new ParameterMapping();
 
-        public Builder(Configuration configuration, String property) {
+        public Builder(Configuration configuration, String property, Class<?> javaType) {
             parameterMapping.configuration = configuration;
             parameterMapping.property = property;
+            parameterMapping.javaType = javaType;
         }
 
         public Builder javaType(Class<?> javaType) {

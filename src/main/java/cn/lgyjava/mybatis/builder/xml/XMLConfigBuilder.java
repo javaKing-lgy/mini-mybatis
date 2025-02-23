@@ -1,12 +1,9 @@
-package cn.lgyjava.mybatis.builder.xml.XMLConfigBuilder;
+package cn.lgyjava.mybatis.builder.xml;
 
 import cn.lgyjava.mybatis.builder.BaseBuilder;
 import cn.lgyjava.mybatis.datasource.DataSourceFactory;
 import cn.lgyjava.mybatis.io.Resources;
-import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.Environment;
-import cn.lgyjava.mybatis.mapping.MappedStatement;
-import cn.lgyjava.mybatis.mapping.SqlCommandType;
 import cn.lgyjava.mybatis.session.Configuration;
 import cn.lgyjava.mybatis.transaction.TransactionFactory;
 import org.dom4j.Document;
@@ -16,10 +13,10 @@ import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
 
 import javax.sql.DataSource;
+import java.io.InputStream;
 import java.io.Reader;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
+import java.util.Properties;
 /**
  * XMLConfigBuilder 核心操作就是在初始化 Configuration 因为Configuration
  * 使用 解析XML 和存放 都是最近的操作 所以放在这里比较合适
@@ -29,28 +26,32 @@ import java.util.regex.Pattern;
  * @author liuguanyi
  * * @date 2025/1/27
  */
-public class XMLConfigBuilder extends BaseBuilder{
+public class XMLConfigBuilder extends BaseBuilder {
 
     private Element root;
 
-    public XMLConfigBuilder(Reader reader){
-        // 1 调用父类初始化 Configuration
+    public XMLConfigBuilder(Reader reader) {
+        // 1. 调用父类初始化Configuration
         super(new Configuration());
-        // 2 dom4j 处理 xml
+        // 2. dom4j 处理 xml
         SAXReader saxReader = new SAXReader();
         try {
             Document document = saxReader.read(new InputSource(reader));
             root = document.getRootElement();
-        }catch (DocumentException e){
+        } catch (DocumentException e) {
             e.printStackTrace();
         }
     }
-    public Configuration parse(){
+
+    /**
+     * 解析配置；类型别名、插件、对象工厂、对象包装工厂、设置、环境、类型转换、映射器
+     *
+     * @return Configuration
+     */
+    public Configuration parse() {
         try {
-
-            // 解析数据源等等
+            // 环境
             environmentsElement(root.element("environments"));
-
             // 解析映射器
             mapperElement(root.element("mappers"));
         } catch (Exception e) {
@@ -58,59 +59,21 @@ public class XMLConfigBuilder extends BaseBuilder{
         }
         return configuration;
     }
-    private void mapperElement(Element mappers) throws Exception {
-        // 读取所有的mapper元素列表
-        List<Element> mapperList = mappers.elements("mapper");
-        // 遍历mapper元素 对于每一个mapper元素 获取其resource值
-        // 获取reader对象
-        for (Element e : mapperList) {
-            String resource = e.attributeValue("resource");
-            Reader reader = Resources.getResourceAsReader(resource);
-            SAXReader saxReader = new SAXReader();
-            //解析映射器xml文件
-            Document document = saxReader.read(new InputSource(reader));
-
-            Element root = document.getRootElement();
-            //命名空间
-            String namespace = root.attributeValue("namespace");
-
-            // SELECT
-            List<Element> selectNodes = root.elements("select");
-            for (Element node : selectNodes) {
-                String id = node.attributeValue("id");
-                String parameterType = node.attributeValue("parameterType");
-                String resultType = node.attributeValue("resultType");
-                String sql = node.getText();
-
-                // ? 匹配
-                Map<Integer, String> parameter = new HashMap<>();
-                Pattern pattern = Pattern.compile("(#\\{(.*?)})");
-                Matcher matcher = pattern.matcher(sql);
-                for (int i = 1; matcher.find(); i++) {
-                    String g1 = matcher.group(1);
-                    String g2 = matcher.group(2);
-                    parameter.put(i, g2);
-                    sql = sql.replace(g1, "?");
-                }
-
-                String msId = namespace + "." + id;
-                String nodeName = node.getName();
-                SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
-                BoundSql boundSql = new BoundSql(sql, parameter, parameterType, resultType);
-                MappedStatement mappedStatement = new MappedStatement.Builder(configuration, msId, sqlCommandType, boundSql).build();
-                // 添加解析 SQL
-                configuration.addMappedStatement(mappedStatement);
-            }
-
-            // 注册Mapper映射器
-            configuration.addMapper(Resources.classForName(namespace));
-        }
-    }
 
     /**
-     * 解析环境标签 以及里面的信息
-     * @param context
-     * @throws Exception
+     * <environments default="development">
+     * <environment id="development">
+     * <transactionManager type="JDBC">
+     * <property name="..." value="..."/>
+     * </transactionManager>
+     * <dataSource type="POOLED">
+     * <property name="driver" value="${driver}"/>
+     * <property name="url" value="${url}"/>
+     * <property name="username" value="${username}"/>
+     * <property name="password" value="${password}"/>
+     * </dataSource>
+     * </environment>
+     * </environments>
      */
     private void environmentsElement(Element context) throws Exception {
         String environment = context.attributeValue("default");
@@ -142,4 +105,24 @@ public class XMLConfigBuilder extends BaseBuilder{
             }
         }
     }
+
+    /*
+     * <mappers>
+     *	 <mapper resource="org/mybatis/builder/AuthorMapper.xml"/>
+     *	 <mapper resource="org/mybatis/builder/BlogMapper.xml"/>
+     *	 <mapper resource="org/mybatis/builder/PostMapper.xml"/>
+     * </mappers>
+     */
+    private void mapperElement(Element mappers) throws Exception {
+        List<Element> mapperList = mappers.elements("mapper");
+        for (Element e : mapperList) {
+            String resource = e.attributeValue("resource");
+            InputStream inputStream = Resources.getResourceAsStream(resource);
+
+            // 在for循环里每个mapper都重新new一个XMLMapperBuilder，来解析
+            XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource);
+            mapperParser.parse();
+        }
+    }
+
 }

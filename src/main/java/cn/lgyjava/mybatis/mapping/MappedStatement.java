@@ -9,14 +9,11 @@ import cn.lgyjava.mybatis.session.Configuration;
  * * @date 2025/1/29
  */
 public class MappedStatement {
-    // MyBatis的全局配置信息 比如环境变量等等
     private Configuration configuration;
-    // 映射语句的唯一标识
     private String id;
-    // 表示的SQL类型
     private SqlCommandType sqlCommandType;
-
-    private BoundSql boundSql;
+    private SqlSource sqlSource;
+    Class<?> resultType;
 
     MappedStatement() {
         // constructor disabled
@@ -29,11 +26,12 @@ public class MappedStatement {
 
         private MappedStatement mappedStatement = new MappedStatement();
 
-        public Builder(Configuration configuration, String id, SqlCommandType sqlCommandType, BoundSql boundSql) {
+        public Builder(Configuration configuration, String id, SqlCommandType sqlCommandType, SqlSource sqlSource, Class<?> resultType) {
             mappedStatement.configuration = configuration;
             mappedStatement.id = id;
             mappedStatement.sqlCommandType = sqlCommandType;
-            mappedStatement.boundSql = boundSql;
+            mappedStatement.sqlSource = sqlSource;
+            mappedStatement.resultType = resultType;
         }
 
         public MappedStatement build() {
@@ -56,8 +54,12 @@ public class MappedStatement {
         return sqlCommandType;
     }
 
-    public BoundSql getBoundSql() {
-        return boundSql;
+    public SqlSource getSqlSource() {
+        return sqlSource;
+    }
+
+    public Class<?> getResultType() {
+        return resultType;
     }
 
 }

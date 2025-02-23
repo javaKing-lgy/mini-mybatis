@@ -13,12 +13,21 @@ import cn.lgyjava.mybatis.executor.statement.StatementHandler;
 import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.Environment;
 import cn.lgyjava.mybatis.mapping.MappedStatement;
+import cn.lgyjava.mybatis.reflection.MetaObject;
+import cn.lgyjava.mybatis.reflection.factory.DefaultObjectFactory;
+import cn.lgyjava.mybatis.reflection.factory.ObjectFactory;
+import cn.lgyjava.mybatis.reflection.wrapper.DefaultObjectWrapperFactory;
+import cn.lgyjava.mybatis.reflection.wrapper.ObjectWrapperFactory;
+import cn.lgyjava.mybatis.scripting.LanguageDriverRegistry;
 import cn.lgyjava.mybatis.transaction.Transaction;
 import cn.lgyjava.mybatis.transaction.jdbc.JdbcTransactionFactory;
 import cn.lgyjava.mybatis.type.TypeAliasRegistry;
+import cn.lgyjava.mybatis.type.TypeHandlerRegistry;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /** 配置项
  * 在配置类中添加映射器注册机 和 映射语句 的存放
@@ -44,6 +53,21 @@ public class Configuration {
      * 类型别名注册机
      */
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+
+    protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
+
+    // 类型处理器注册机
+    protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
+
+    // 对象工厂和对象包装器工厂
+    protected ObjectFactory objectFactory = new DefaultObjectFactory();
+    protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
+
+    protected final Set<String> loadedResources = new HashSet<>();
+
+    protected String databaseId;
+
+
 
     public Configuration() {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
@@ -108,6 +132,30 @@ public class Configuration {
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, ResultHandler resultHandler, BoundSql boundSql) {
         return new PreparedStatementHandler(executor, mappedStatement, parameter, resultHandler, boundSql);
     }
+    // 创建元对象
+    public MetaObject newMetaObject(Object object) {
+        return MetaObject.forObject(object, objectFactory, objectWrapperFactory);
+    }
 
+    // 类型处理器注册机
+    public TypeHandlerRegistry getTypeHandlerRegistry() {
+        return typeHandlerRegistry;
+    }
+
+    public boolean isResourceLoaded(String resource) {
+        return loadedResources.contains(resource);
+    }
+
+    public void addLoadedResource(String resource) {
+        loadedResources.add(resource);
+    }
+
+    public LanguageDriverRegistry getLanguageRegistry() {
+        return languageRegistry;
+    }
+
+    public String getDatabaseId() {
+        return databaseId;
+    }
 
 }
