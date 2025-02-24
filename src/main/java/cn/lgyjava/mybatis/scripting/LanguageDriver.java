@@ -1,5 +1,8 @@
 package cn.lgyjava.mybatis.scripting;
 
+import cn.lgyjava.mybatis.executor.parameter.ParameterHandler;
+import cn.lgyjava.mybatis.mapping.BoundSql;
+import cn.lgyjava.mybatis.mapping.MappedStatement;
 import cn.lgyjava.mybatis.mapping.SqlSource;
 import cn.lgyjava.mybatis.session.Configuration;
 import org.dom4j.Element;
@@ -12,5 +15,8 @@ import org.dom4j.Element;
 public interface LanguageDriver {
 
     SqlSource createSqlSource(Configuration configuration, Element script, Class<?> parameterType);
-
+    /**
+     * 创建参数处理器
+     */
+    ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql);
 }

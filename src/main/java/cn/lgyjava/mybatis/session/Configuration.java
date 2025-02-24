@@ -6,6 +6,7 @@ import cn.lgyjava.mybatis.datasource.pooled.PooledDataSourceFactory;
 import cn.lgyjava.mybatis.datasource.unpooled.UnpooledDataSourceFactory;
 import cn.lgyjava.mybatis.executor.Executor;
 import cn.lgyjava.mybatis.executor.SimpleExecutor;
+import cn.lgyjava.mybatis.executor.parameter.ParameterHandler;
 import cn.lgyjava.mybatis.executor.resultset.DefaultResultSetHandler;
 import cn.lgyjava.mybatis.executor.resultset.ResultSetHandler;
 import cn.lgyjava.mybatis.executor.statement.PreparedStatementHandler;
@@ -18,6 +19,7 @@ import cn.lgyjava.mybatis.reflection.factory.DefaultObjectFactory;
 import cn.lgyjava.mybatis.reflection.factory.ObjectFactory;
 import cn.lgyjava.mybatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import cn.lgyjava.mybatis.reflection.wrapper.ObjectWrapperFactory;
+import cn.lgyjava.mybatis.scripting.LanguageDriver;
 import cn.lgyjava.mybatis.scripting.LanguageDriverRegistry;
 import cn.lgyjava.mybatis.transaction.Transaction;
 import cn.lgyjava.mybatis.transaction.jdbc.JdbcTransactionFactory;
@@ -156,6 +158,16 @@ public class Configuration {
 
     public String getDatabaseId() {
         return databaseId;
+    }
+    public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
+        // 创建参数处理器
+        ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);
+        // 插件的一些参数，也是在这里处理，暂时不添加这部分内容 interceptorChain.pluginAll(parameterHandler);
+        return parameterHandler;
+    }
+
+    public LanguageDriver getDefaultScriptingLanguageInstance() {
+        return languageRegistry.getDefaultDriver();
     }
 
 }
