@@ -3,6 +3,8 @@ package cn.lgyjava.mybatis.mapping;
 import cn.lgyjava.mybatis.scripting.LanguageDriver;
 import cn.lgyjava.mybatis.session.Configuration;
 
+import java.util.List;
+
 /** 映射语句类
  * 这个类是模拟Mybatis的MappedStatement类 用于表示一个映射语句
  * 映射语句通常定义在xml文件中
@@ -16,6 +18,7 @@ public class MappedStatement {
     private SqlSource sqlSource;
     Class<?> resultType;
     private LanguageDriver lang;
+    private List<ResultMap> resultMaps;
     MappedStatement() {
         // constructor disabled
     }
@@ -41,6 +44,14 @@ public class MappedStatement {
             assert mappedStatement.id != null;
             return mappedStatement;
         }
+        public String id() {
+            return mappedStatement.id;
+        }
+
+        public Builder resultMaps(List<ResultMap> resultMaps) {
+            mappedStatement.resultMaps = resultMaps;
+            return this;
+        }
 
     }
 
@@ -65,6 +76,9 @@ public class MappedStatement {
     }
     public LanguageDriver getLang() {
         return lang;
+    }
+    public List<ResultMap> getResultMaps() {
+        return resultMaps;
     }
 
 }

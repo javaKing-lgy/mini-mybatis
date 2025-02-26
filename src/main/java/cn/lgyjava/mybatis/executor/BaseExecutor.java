@@ -4,6 +4,7 @@ import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.MappedStatement;
 import cn.lgyjava.mybatis.session.Configuration;
 import cn.lgyjava.mybatis.session.ResultHandler;
+import cn.lgyjava.mybatis.session.RowBounds;
 import cn.lgyjava.mybatis.transaction.Transaction;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +43,11 @@ public abstract class BaseExecutor implements Executor {
     }
 
     @Override
-    public <E> List<E> query(MappedStatement ms, Object parameter, ResultHandler resultHandler, BoundSql boundSql) {
+    public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         if (closed) {
             throw new RuntimeException("Executor was closed.");
         }
-        return doQuery(ms, parameter, resultHandler, boundSql);
+        return doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     }
     /**
      * 执行查询
@@ -57,7 +58,7 @@ public abstract class BaseExecutor implements Executor {
      * @param <E>
      * @return
      */
-    protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, ResultHandler resultHandler, BoundSql boundSql);
+    protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql);
 
     @Override
     public Transaction getTransaction() {

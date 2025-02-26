@@ -3,6 +3,7 @@ package cn.lgyjava.mybatis.executor;
 import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.MappedStatement;
 import cn.lgyjava.mybatis.session.ResultHandler;
+import cn.lgyjava.mybatis.session.RowBounds;
 import cn.lgyjava.mybatis.transaction.Transaction;
 
 import java.sql.SQLException;
@@ -17,7 +18,7 @@ public interface Executor {
 
     ResultHandler NO_RESULT_HANDLER = null;
 
-    <E> List<E> query(MappedStatement ms, Object parameter, ResultHandler resultHandler, BoundSql boundSql);
+    <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql);
 
     Transaction getTransaction();
 
