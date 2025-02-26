@@ -1,9 +1,6 @@
 package cn.lgyjava.mybatis.builder;
 
-import cn.lgyjava.mybatis.mapping.MappedStatement;
-import cn.lgyjava.mybatis.mapping.ResultMap;
-import cn.lgyjava.mybatis.mapping.SqlCommandType;
-import cn.lgyjava.mybatis.mapping.SqlSource;
+import cn.lgyjava.mybatis.mapping.*;
 import cn.lgyjava.mybatis.scripting.LanguageDriver;
 import cn.lgyjava.mybatis.session.Configuration;
 
@@ -95,6 +92,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
             resultMaps.add(inlineResultMapBuilder.build());
         }
         statementBuilder.resultMaps(resultMaps);
+    }
+    public ResultMap addResultMap(String id, Class<?> type, List<ResultMapping> resultMappings) {
+        ResultMap.Builder inlineResultMapBuilder = new ResultMap.Builder(
+                configuration,
+                id,
+                type,
+                resultMappings);
+
+        ResultMap resultMap = inlineResultMapBuilder.build();
+        configuration.addResultMap(resultMap);
+        return resultMap;
     }
 
 }
