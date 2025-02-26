@@ -28,16 +28,30 @@ public class MapperMethod {
     public Object execute(SqlSession sqlSession, Object[] args) {
         Object result = null;
         switch (command.getType()) {
-            case INSERT:
-                break;
-            case DELETE:
-                break;
-            case UPDATE:
-                break;
-            case SELECT:
+            case INSERT: {
                 Object param = method.convertArgsToSqlCommandParam(args);
-                result = sqlSession.selectOne(command.getName(), param);
+                result = sqlSession.insert(command.getName(), param);
                 break;
+            }
+            case DELETE: {
+                Object param = method.convertArgsToSqlCommandParam(args);
+                result = sqlSession.delete(command.getName(), param);
+                break;
+            }
+            case UPDATE: {
+                Object param = method.convertArgsToSqlCommandParam(args);
+                result = sqlSession.update(command.getName(), param);
+                break;
+            }
+            case SELECT: {
+                Object param = method.convertArgsToSqlCommandParam(args);
+                if (method.returnsMany) {
+                    result = sqlSession.selectList(command.getName(), param);
+                } else {
+                    result = sqlSession.selectOne(command.getName(), param);
+                }
+                break;
+            }
             default:
                 throw new RuntimeException("Unknown execution method for: " + command.getName());
         }
@@ -73,9 +87,13 @@ public class MapperMethod {
      */
     public static class MethodSignature {
 
+        private final boolean returnsMany;
+        private final Class<?> returnType;
         private final SortedMap<Integer, String> params;
 
         public MethodSignature(Configuration configuration, Method method) {
+            this.returnType = method.getReturnType();
+            this.returnsMany = (configuration.getObjectFactory().isCollection(this.returnType) || this.returnType.isArray());
             this.params = Collections.unmodifiableSortedMap(getParams(method));
         }
 
@@ -116,13 +134,17 @@ public class MapperMethod {
             final Class<?>[] argTypes = method.getParameterTypes();
             for (int i = 0; i < argTypes.length; i++) {
                 String paramName = String.valueOf(params.size());
-                // 不做 Param 的实现，这部分不处理。如果扩展学习，需要添加 Param 注解并做扩展实现。
                 params.put(i, paramName);
             }
             return params;
         }
 
+        public boolean returnsMany() {
+            return returnsMany;
+        }
+
     }
+
 
     /**
      * 参数map，静态内部类,更严格的get方法，如果没有相应的key，报错

@@ -21,24 +21,22 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     public SimpleStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         super(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
-    /**
-     * 创建Statement
-     * @param connection
-     * @return
-     * @throws SQLException
-     */
+
     @Override
     protected Statement instantiateStatement(Connection connection) throws SQLException {
         return connection.createStatement();
     }
-    /**
-     * 参数化
-     * @param statement
-     * @throws SQLException
-     */
+
     @Override
     public void parameterize(Statement statement) throws SQLException {
-        // NA
+        // N/A
+    }
+
+    @Override
+    public int update(Statement statement) throws SQLException {
+        String sql = boundSql.getSql();
+        statement.execute(sql);
+        return statement.getUpdateCount();
     }
 
     @Override
