@@ -1,5 +1,6 @@
 package cn.lgyjava.mybatis.builder;
 
+import cn.lgyjava.mybatis.executor.keygen.KeyGenerator;
 import cn.lgyjava.mybatis.mapping.*;
 import cn.lgyjava.mybatis.reflection.MetaClass;
 import cn.lgyjava.mybatis.scripting.LanguageDriver;
@@ -52,11 +53,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
             Class<?> parameterType,
             String resultMap,
             Class<?> resultType,
+            KeyGenerator keyGenerator,
+            String keyProperty,
             LanguageDriver lang
     ) {
         // 给id加上namespace前缀：cn.bugstack.mybatis.test.dao.IUserDao.queryUserInfoById
         id = applyCurrentNamespace(id, false);
+
         MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlCommandType, sqlSource, resultType);
+        statementBuilder.resource(resource);
+        statementBuilder.keyGenerator(keyGenerator);
+        statementBuilder.keyProperty(keyProperty);
 
         // 结果映射，给 MappedStatement#resultMaps
         setStatementResultMap(resultMap, resultType, statementBuilder);
@@ -78,7 +85,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
         List<ResultMap> resultMaps = new ArrayList<>();
 
         if (resultMap != null) {
-            // TODO：暂无Map结果映射配置，本章节不添加此逻辑
+            String[] resultMapNames = resultMap.split(",");
+            for (String resultMapName : resultMapNames) {
+                resultMaps.add(configuration.getResultMap(resultMapName.trim()));
+            }
         }
         /*
          * 通常使用 resultType 即可满足大部分场景
@@ -96,6 +106,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
         statementBuilder.resultMaps(resultMaps);
     }
     public ResultMap addResultMap(String id, Class<?> type, List<ResultMapping> resultMappings) {
+        // 补全ID全路径，如：cn.bugstack.mybatis.test.dao.IActivityDao + activityMap
+        id = applyCurrentNamespace(id, false);
+
         ResultMap.Builder inlineResultMapBuilder = new ResultMap.Builder(
                 configuration,
                 id,
@@ -106,7 +119,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
         configuration.addResultMap(resultMap);
         return resultMap;
     }
-    // step-13 新增方法
     public ResultMapping buildResultMapping(
             Class<?> resultType,
             String property,

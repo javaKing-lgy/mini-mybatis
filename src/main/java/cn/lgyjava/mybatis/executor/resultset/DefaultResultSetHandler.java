@@ -25,12 +25,14 @@ import java.util.Locale;
 
 /**
  * 结果集处理器
+ *
  * @author liuguanyi
  * * @date 2025/2/19
  */
 public class DefaultResultSetHandler implements ResultSetHandler {
 
     private static final Object NO_VALUE = new Object();
+
     private final Configuration configuration;
     private final MappedStatement mappedStatement;
     private final RowBounds rowBounds;
@@ -97,7 +99,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     private void handleRowValuesForSimpleResultMap(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
         DefaultResultContext resultContext = new DefaultResultContext();
-        while (resultContext.getResultCount() < rowBounds.getLimit() && rsw.getResultSet().next()) {
+        ResultSet resultSet = rsw.getResultSet();
+        while (resultContext.getResultCount() < rowBounds.getLimit() && resultSet.next()) {
             Object rowValue = getRowValue(rsw, resultMap);
             callResultHandler(resultHandler, resultContext, rowValue);
         }
@@ -116,6 +119,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         Object resultObject = createResultObject(rsw, resultMap, null);
         if (resultObject != null && !typeHandlerRegistry.hasTypeHandler(resultMap.getType())) {
             final MetaObject metaObject = configuration.newMetaObject(resultObject);
+            // 自动映射：把每列的值都赋到对应的字段上
             applyAutomaticMappings(rsw, resultMap, metaObject, null);
             // Map映射：根据映射类型赋值到字段
             applyPropertyMappings(rsw, resultMap, metaObject, null);
@@ -135,14 +139,39 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     private Object createResultObject(ResultSetWrapper rsw, ResultMap resultMap, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, String columnPrefix) throws SQLException {
         final Class<?> resultType = resultMap.getType();
         final MetaClass metaType = MetaClass.forClass(resultType);
-        if (resultType.isInterface() || metaType.hasDefaultConstructor()) {
+        if (typeHandlerRegistry.hasTypeHandler(resultType)) {
+            // 基本类型
+            return createPrimitiveResultObject(rsw, resultMap, columnPrefix);
+        } else if (resultType.isInterface() || metaType.hasDefaultConstructor()) {
             // 普通的Bean对象类型
             return objectFactory.create(resultType);
         }
         throw new RuntimeException("Do not know how to create an instance of " + resultType);
     }
 
-    private boolean applyAutomaticMappings(ResultSetWrapper rsw, ResultMap resultMap, MetaObject metaObject, String columnPrefix) throws SQLException{
+    // 简单类型创建
+    private Object createPrimitiveResultObject(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix) throws SQLException {
+        final Class<?> resultType = resultMap.getType();
+        final String columnName;
+        if (!resultMap.getResultMappings().isEmpty()) {
+            final List<ResultMapping> resultMappingList = resultMap.getResultMappings();
+            final ResultMapping mapping = resultMappingList.get(0);
+            columnName = prependPrefix(mapping.getColumn(), columnPrefix);
+        } else {
+            columnName = rsw.getColumnNames().get(0);
+        }
+        final TypeHandler<?> typeHandler = rsw.getTypeHandler(resultType, columnName);
+        return typeHandler.getResult(rsw.getResultSet(), columnName);
+    }
+
+    private String prependPrefix(String columnName, String prefix) {
+        if (columnName == null || columnName.length() == 0 || prefix == null || prefix.length() == 0) {
+            return columnName;
+        }
+        return prefix + columnName;
+    }
+
+    private boolean applyAutomaticMappings(ResultSetWrapper rsw, ResultMap resultMap, MetaObject metaObject, String columnPrefix) throws SQLException {
         final List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(resultMap, columnPrefix);
         boolean foundValues = false;
         for (String columnName : unmappedColumnNames) {
@@ -174,6 +203,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
         return foundValues;
     }
+
     private boolean applyPropertyMappings(ResultSetWrapper rsw, ResultMap resultMap, MetaObject metaObject, String columnPrefix) throws SQLException {
         final List<String> mappedColumnNames = rsw.getMappedColumnNames(resultMap, columnPrefix);
         boolean foundValues = false;
@@ -195,4 +225,5 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
         return foundValues;
     }
+
 }

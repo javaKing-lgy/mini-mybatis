@@ -1,6 +1,7 @@
 package cn.lgyjava.mybatis.executor.statement;
 
 import cn.lgyjava.mybatis.executor.Executor;
+import cn.lgyjava.mybatis.executor.keygen.KeyGenerator;
 import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.MappedStatement;
 import cn.lgyjava.mybatis.session.ResultHandler;
@@ -41,7 +42,11 @@ public class PreparedStatementHandler extends BaseStatementHandler{
     public int update(Statement statement) throws SQLException {
         PreparedStatement ps = (PreparedStatement) statement;
         ps.execute();
-        return ps.getUpdateCount();
+        int rows = ps.getUpdateCount();
+        Object parameterObject = boundSql.getParameterObject();
+        KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+        keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
+        return rows;
     }
 
     @Override

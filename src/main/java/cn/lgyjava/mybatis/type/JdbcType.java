@@ -12,6 +12,7 @@ import java.util.Map;
 public enum JdbcType {
 
     INTEGER(Types.INTEGER),
+    BIGINT(Types.BIGINT),
     FLOAT(Types.FLOAT),
     DOUBLE(Types.DOUBLE),
     DECIMAL(Types.DECIMAL),
