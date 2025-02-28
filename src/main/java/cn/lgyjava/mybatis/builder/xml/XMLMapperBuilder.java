@@ -2,7 +2,11 @@ package cn.lgyjava.mybatis.builder.xml;
 
 import cn.lgyjava.mybatis.builder.BaseBuilder;
 import cn.lgyjava.mybatis.builder.MapperBuilderAssistant;
+import cn.lgyjava.mybatis.builder.ResultMapResolver;
 import cn.lgyjava.mybatis.io.Resources;
+import cn.lgyjava.mybatis.mapping.ResultFlag;
+import cn.lgyjava.mybatis.mapping.ResultMap;
+import cn.lgyjava.mybatis.mapping.ResultMapping;
 import cn.lgyjava.mybatis.session.Configuration;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -10,6 +14,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -62,7 +68,11 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
         builderAssistant.setCurrentNamespace(namespace);
 
-        // 2.配置select|insert|update|delete
+        // 2. 解析resultMap step-13 新增
+        resultMapElements(element.elements("resultMap"));
+
+
+        // 3.配置select|insert|update|delete
         buildStatementFromContext(element.elements("select"),
                 element.elements("insert"),
                 element.elements("update"),
@@ -80,4 +90,46 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
+    private void resultMapElements(List<Element> list) {
+        for (Element element : list) {
+            try {
+                resultMapElement(element, Collections.emptyList());
+            } catch (Exception ignore) {
+            }
+        }
+    }
+    private ResultMap resultMapElement(Element resultMapNode, List<ResultMapping> additionalResultMappings) throws Exception {
+        String id = resultMapNode.attributeValue("id");
+        String type = resultMapNode.attributeValue("type");
+        Class<?> typeClass = resolveClass(type);
+
+        List<ResultMapping> resultMappings = new ArrayList<>();
+        resultMappings.addAll(additionalResultMappings);
+
+        List<Element> resultChildren = resultMapNode.elements();
+        for (Element resultChild : resultChildren) {
+            List<ResultFlag> flags = new ArrayList<>();
+            if ("id".equals(resultChild.getName())) {
+                flags.add(ResultFlag.ID);
+            }
+            // 构建 ResultMapping
+            resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
+        }
+        // 创建结果映射解析器
+        ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, resultMappings);
+        return resultMapResolver.resolve();
+    }
+    /**
+     * <id column="id" property="id"/>
+     * <result column="activity_id" property="activityId"/>
+     */
+    private ResultMapping buildResultMappingFromContext(Element context, Class<?> resultType, List<ResultFlag> flags) throws Exception {
+        String property = context.attributeValue("property");
+        String column = context.attributeValue("column");
+        return builderAssistant.buildResultMapping(resultType, property, column, flags);
+    }
+    // 配置select|insert|update|delete
+
+
+
 }

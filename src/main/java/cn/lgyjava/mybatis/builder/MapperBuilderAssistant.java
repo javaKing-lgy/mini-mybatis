@@ -1,8 +1,10 @@
 package cn.lgyjava.mybatis.builder;
 
 import cn.lgyjava.mybatis.mapping.*;
+import cn.lgyjava.mybatis.reflection.MetaClass;
 import cn.lgyjava.mybatis.scripting.LanguageDriver;
 import cn.lgyjava.mybatis.session.Configuration;
+import cn.lgyjava.mybatis.type.TypeHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +105,42 @@ public class MapperBuilderAssistant extends BaseBuilder {
         ResultMap resultMap = inlineResultMapBuilder.build();
         configuration.addResultMap(resultMap);
         return resultMap;
+    }
+    // step-13 新增方法
+    public ResultMapping buildResultMapping(
+            Class<?> resultType,
+            String property,
+            String column,
+            List<ResultFlag> flags) {
+
+        Class<?> javaTypeClass = resolveResultJavaType(resultType, property, null);
+        TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, null);
+
+        ResultMapping.Builder builder = new ResultMapping.Builder(configuration, property, column, javaTypeClass);
+        builder.typeHandler(typeHandlerInstance);
+        builder.flags(flags);
+
+        return builder.build();
+
+    }
+    private Class<?> resolveResultJavaType(Class<?> resultType, String property, Class<?> javaType) {
+        if (javaType == null && property != null) {
+            try {
+                MetaClass metaResultType = MetaClass.forClass(resultType);
+                javaType = metaResultType.getSetterType(property);
+            } catch (Exception ignore) {
+            }
+        }
+        if (javaType == null) {
+            javaType = Object.class;
+        }
+        return javaType;
+    }
+    protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
+        if (typeHandlerType == null){
+            return null;
+        }
+        return typeHandlerRegistry.getMappingTypeHandler(typeHandlerType);
     }
 
 }

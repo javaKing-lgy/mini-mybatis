@@ -30,6 +30,7 @@ import java.util.Locale;
  */
 public class DefaultResultSetHandler implements ResultSetHandler {
 
+    private static final Object NO_VALUE = new Object();
     private final Configuration configuration;
     private final MappedStatement mappedStatement;
     private final RowBounds rowBounds;
@@ -116,6 +117,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         if (resultObject != null && !typeHandlerRegistry.hasTypeHandler(resultMap.getType())) {
             final MetaObject metaObject = configuration.newMetaObject(resultObject);
             applyAutomaticMappings(rsw, resultMap, metaObject, null);
+            // Map映射：根据映射类型赋值到字段
+            applyPropertyMappings(rsw, resultMap, metaObject, null);
         }
         return resultObject;
     }
@@ -166,6 +169,27 @@ public class DefaultResultSetHandler implements ResultSetHandler {
                         // 通过反射工具类设置属性值
                         metaObject.setValue(property, value);
                     }
+                }
+            }
+        }
+        return foundValues;
+    }
+    private boolean applyPropertyMappings(ResultSetWrapper rsw, ResultMap resultMap, MetaObject metaObject, String columnPrefix) throws SQLException {
+        final List<String> mappedColumnNames = rsw.getMappedColumnNames(resultMap, columnPrefix);
+        boolean foundValues = false;
+        final List<ResultMapping> propertyMappings = resultMap.getPropertyResultMappings();
+        for (ResultMapping propertyMapping : propertyMappings) {
+            final String column = propertyMapping.getColumn();
+            if (column != null && mappedColumnNames.contains(column.toUpperCase(Locale.ENGLISH))) {
+                // 获取值
+                final TypeHandler<?> typeHandler = propertyMapping.getTypeHandler();
+                Object value = typeHandler.getResult(rsw.getResultSet(), column);
+                // 设置值
+                final String property = propertyMapping.getProperty();
+                if (value != NO_VALUE && property != null && value != null) {
+                    // 通过反射工具类设置属性值
+                    metaObject.setValue(property, value);
+                    foundValues = true;
                 }
             }
         }
