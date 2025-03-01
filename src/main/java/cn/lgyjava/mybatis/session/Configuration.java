@@ -16,6 +16,8 @@ import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.Environment;
 import cn.lgyjava.mybatis.mapping.MappedStatement;
 import cn.lgyjava.mybatis.mapping.ResultMap;
+import cn.lgyjava.mybatis.plugin.Interceptor;
+import cn.lgyjava.mybatis.plugin.InterceptorChain;
 import cn.lgyjava.mybatis.reflection.MetaObject;
 import cn.lgyjava.mybatis.reflection.factory.DefaultObjectFactory;
 import cn.lgyjava.mybatis.reflection.factory.ObjectFactory;
@@ -23,6 +25,7 @@ import cn.lgyjava.mybatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import cn.lgyjava.mybatis.reflection.wrapper.ObjectWrapperFactory;
 import cn.lgyjava.mybatis.scripting.LanguageDriver;
 import cn.lgyjava.mybatis.scripting.LanguageDriverRegistry;
+import cn.lgyjava.mybatis.scripting.xmltags.XMLLanguageDriver;
 import cn.lgyjava.mybatis.transaction.Transaction;
 import cn.lgyjava.mybatis.transaction.jdbc.JdbcTransactionFactory;
 import cn.lgyjava.mybatis.type.TypeAliasRegistry;
@@ -41,26 +44,24 @@ import java.util.Set;
  */
 public class Configuration {
 
+    //环境
     protected Environment environment;
     protected boolean useGeneratedKeys = false;
 
-    /**
-     * 映射注册机
-     */
+    // 映射注册机
     protected MapperRegistry mapperRegistry = new MapperRegistry(this);
 
-    /**
-     * 映射的语句，存在Map里
-     */
+    // 映射的语句，存在Map里
     protected final Map<String, MappedStatement> mappedStatements = new HashMap<>();
     // 结果映射，存在Map里
     protected final Map<String, ResultMap> resultMaps = new HashMap<>();
     protected final Map<String, KeyGenerator> keyGenerators = new HashMap<>();
-    /**
-     * 类型别名注册机
-     */
-    protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
 
+    // 插件拦截器链
+    protected final InterceptorChain interceptorChain = new InterceptorChain();
+
+    // 类型别名注册机
+    protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
     // 类型处理器注册机
@@ -74,13 +75,14 @@ public class Configuration {
 
     protected String databaseId;
 
-
-
     public Configuration() {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
+
         typeAliasRegistry.registerAlias("DRUID", DruidDataSourceFactory.class);
         typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
         typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
+
+        languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
     }
 
     public void addMappers(String packageName) {
@@ -119,18 +121,17 @@ public class Configuration {
         this.environment = environment;
     }
 
-    /**
-     * 创建语句处理器
-     */
-    public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        return new PreparedStatementHandler(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
+    public String getDatabaseId() {
+        return databaseId;
     }
+
     /**
      * 创建结果集处理器
      */
     public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         return new DefaultResultSetHandler(executor, mappedStatement, resultHandler, rowBounds, boundSql);
     }
+
     /**
      * 生产执行器
      */
@@ -138,6 +139,16 @@ public class Configuration {
         return new SimpleExecutor(this, transaction);
     }
 
+    /**
+     * 创建语句处理器
+     */
+    public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+        // 创建语句处理器，Mybatis 这里加了路由 STATEMENT、PREPARED、CALLABLE 我们默认只根据预处理进行实例化
+        StatementHandler statementHandler = new PreparedStatementHandler(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
+        // 嵌入插件，代理对象
+        statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
+        return statementHandler;
+    }
 
     // 创建元对象
     public MetaObject newMetaObject(Object object) {
@@ -161,9 +172,6 @@ public class Configuration {
         return languageRegistry;
     }
 
-    public String getDatabaseId() {
-        return databaseId;
-    }
     public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         // 创建参数处理器
         ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);
@@ -174,9 +182,11 @@ public class Configuration {
     public LanguageDriver getDefaultScriptingLanguageInstance() {
         return languageRegistry.getDefaultDriver();
     }
+
     public ObjectFactory getObjectFactory() {
         return objectFactory;
     }
+
     public ResultMap getResultMap(String id) {
         return resultMaps.get(id);
     }
@@ -205,5 +215,8 @@ public class Configuration {
         this.useGeneratedKeys = useGeneratedKeys;
     }
 
+    public void addInterceptor(Interceptor interceptorInstance) {
+        interceptorChain.addInterceptor(interceptorInstance);
+    }
 
 }

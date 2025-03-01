@@ -1,5 +1,6 @@
 package cn.lgyjava.mybatis.executor.statement;
 
+import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.session.ResultHandler;
 
 import java.sql.Connection;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public interface StatementHandler {
 
-
+    /** 准备语句 */
     Statement prepare(Connection connection) throws SQLException;
 
     /** 参数化 */
@@ -25,4 +26,8 @@ public interface StatementHandler {
 
     /** 执行查询 */
     <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException;
+
+    /** 获取绑定SQL */
+    BoundSql getBoundSql();
+
 }
