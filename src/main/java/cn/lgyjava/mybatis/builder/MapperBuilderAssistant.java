@@ -1,5 +1,8 @@
 package cn.lgyjava.mybatis.builder;
 
+import cn.lgyjava.mybatis.cache.Cache;
+import cn.lgyjava.mybatis.cache.decorators.FifoCache;
+import cn.lgyjava.mybatis.cache.impl.PerpetualCache;
 import cn.lgyjava.mybatis.executor.keygen.KeyGenerator;
 import cn.lgyjava.mybatis.mapping.*;
 import cn.lgyjava.mybatis.reflection.MetaClass;
@@ -9,6 +12,7 @@ import cn.lgyjava.mybatis.type.TypeHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * 映射器构建对象
@@ -19,10 +23,43 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
     private String currentNamespace;
     private String resource;
+    private Cache currentCache;
 
     public MapperBuilderAssistant(Configuration configuration, String resource) {
         super(configuration);
         this.resource = resource;
+    }
+
+    // step-13 新增方法
+    public ResultMapping buildResultMapping(
+            Class<?> resultType,
+            String property,
+            String column,
+            List<ResultFlag> flags) {
+
+        Class<?> javaTypeClass = resolveResultJavaType(resultType, property, null);
+        TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, null);
+
+        ResultMapping.Builder builder = new ResultMapping.Builder(configuration, property, column, javaTypeClass);
+        builder.typeHandler(typeHandlerInstance);
+        builder.flags(flags);
+
+        return builder.build();
+
+    }
+
+    private Class<?> resolveResultJavaType(Class<?> resultType, String property, Class<?> javaType) {
+        if (javaType == null && property != null) {
+            try {
+                MetaClass metaResultType = MetaClass.forClass(resultType);
+                javaType = metaResultType.getSetterType(property);
+            } catch (Exception ignore) {
+            }
+        }
+        if (javaType == null) {
+            javaType = Object.class;
+        }
+        return javaType;
     }
 
     public String getCurrentNamespace() {
@@ -37,9 +74,18 @@ public class MapperBuilderAssistant extends BaseBuilder {
         if (base == null) {
             return null;
         }
+
         if (isReference) {
             if (base.contains(".")) return base;
+        } else {
+            if (base.startsWith(currentNamespace + ".")) {
+                return base;
+            }
+            if (base.contains(".")) {
+                throw new RuntimeException("Dots are not allowed in element names, please remove it from " + base);
+            }
         }
+
         return currentNamespace + "." + base;
     }
 
@@ -53,12 +99,16 @@ public class MapperBuilderAssistant extends BaseBuilder {
             Class<?> parameterType,
             String resultMap,
             Class<?> resultType,
+            boolean flushCache,
+            boolean useCache,
             KeyGenerator keyGenerator,
             String keyProperty,
             LanguageDriver lang
     ) {
         // 给id加上namespace前缀：cn.bugstack.mybatis.test.dao.IUserDao.queryUserInfoById
         id = applyCurrentNamespace(id, false);
+        //是否是select语句
+        boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
 
         MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlCommandType, sqlSource, resultType);
         statementBuilder.resource(resource);
@@ -67,12 +117,26 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
         // 结果映射，给 MappedStatement#resultMaps
         setStatementResultMap(resultMap, resultType, statementBuilder);
+        setStatementCache(isSelect, flushCache, useCache, currentCache, statementBuilder);
 
         MappedStatement statement = statementBuilder.build();
         // 映射语句信息，建造完存放到配置项中
         configuration.addMappedStatement(statement);
 
         return statement;
+    }
+
+    private void setStatementCache(
+            boolean isSelect,
+            boolean flushCache,
+            boolean useCache,
+            Cache cache,
+            MappedStatement.Builder statementBuilder) {
+        flushCache = valueOrDefault(flushCache, !isSelect);
+        useCache = valueOrDefault(useCache, isSelect);
+        statementBuilder.flushCacheRequired(flushCache);
+        statementBuilder.useCache(useCache);
+        statementBuilder.cache(cache);
     }
 
     private void setStatementResultMap(
@@ -105,6 +169,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
         statementBuilder.resultMaps(resultMaps);
     }
+
+    // step-13 新增方法
     public ResultMap addResultMap(String id, Class<?> type, List<ResultMapping> resultMappings) {
         // 补全ID全路径，如：cn.bugstack.mybatis.test.dao.IActivityDao + activityMap
         id = applyCurrentNamespace(id, false);
@@ -119,40 +185,37 @@ public class MapperBuilderAssistant extends BaseBuilder {
         configuration.addResultMap(resultMap);
         return resultMap;
     }
-    public ResultMapping buildResultMapping(
-            Class<?> resultType,
-            String property,
-            String column,
-            List<ResultFlag> flags) {
 
-        Class<?> javaTypeClass = resolveResultJavaType(resultType, property, null);
-        TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, null);
+    public Cache useNewCache(Class<? extends Cache> typeClass,
+                             Class<? extends Cache> evictionClass,
+                             Long flushInterval,
+                             Integer size,
+                             boolean readWrite,
+                             boolean blocking,
+                             Properties props) {
+        // 判断为null，则用默认值
+        typeClass = valueOrDefault(typeClass, PerpetualCache.class);
+        evictionClass = valueOrDefault(evictionClass, FifoCache.class);
 
-        ResultMapping.Builder builder = new ResultMapping.Builder(configuration, property, column, javaTypeClass);
-        builder.typeHandler(typeHandlerInstance);
-        builder.flags(flags);
+        // 建造者模式构建 Cache [currentNamespace=cn.bugstack.mybatis.test.dao.IActivityDao]
+        Cache cache = new CacheBuilder(currentNamespace)
+                .implementation(typeClass)
+                .addDecorator(evictionClass)
+                .clearInterval(flushInterval)
+                .size(size)
+                .readWrite(readWrite)
+                .blocking(blocking)
+                .properties(props)
+                .build();
 
-        return builder.build();
-
+        // 添加缓存
+        configuration.addCache(cache);
+        currentCache = cache;
+        return cache;
     }
-    private Class<?> resolveResultJavaType(Class<?> resultType, String property, Class<?> javaType) {
-        if (javaType == null && property != null) {
-            try {
-                MetaClass metaResultType = MetaClass.forClass(resultType);
-                javaType = metaResultType.getSetterType(property);
-            } catch (Exception ignore) {
-            }
-        }
-        if (javaType == null) {
-            javaType = Object.class;
-        }
-        return javaType;
-    }
-    protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
-        if (typeHandlerType == null){
-            return null;
-        }
-        return typeHandlerRegistry.getMappingTypeHandler(typeHandlerType);
+
+    private <T> T valueOrDefault(T value, T defaultValue) {
+        return value == null ? defaultValue : value;
     }
 
 }

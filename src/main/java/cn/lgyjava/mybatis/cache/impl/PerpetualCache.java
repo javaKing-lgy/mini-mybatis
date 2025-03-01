@@ -14,10 +14,7 @@ import java.util.Map;
  * * @date 2025/3/1
  */
 
-
 public class PerpetualCache implements Cache {
-
-    private Logger logger = LoggerFactory.getLogger(PerpetualCache.class);
 
     private String id;
 
@@ -40,11 +37,7 @@ public class PerpetualCache implements Cache {
 
     @Override
     public Object getObject(Object key) {
-        Object obj = cache.get(key);
-        if (null != obj) {
-            logger.info("一级缓存 \r\nkey：{} \r\nval：{}", key, JSON.toJSONString(obj));
-        }
-        return obj;
+        return cache.get(key);
     }
 
     @Override

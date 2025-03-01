@@ -22,6 +22,7 @@ import java.util.Locale;
  * * @date 2025/2/23
  */
 public class XMLStatementBuilder extends BaseBuilder {
+
     private MapperBuilderAssistant builderAssistant;
     private Element element;
 
@@ -30,6 +31,7 @@ public class XMLStatementBuilder extends BaseBuilder {
         this.builderAssistant = builderAssistant;
         this.element = element;
     }
+
     //解析语句(select|insert|update|delete)
     //<select
     //  id="selectPerson"
@@ -59,12 +61,20 @@ public class XMLStatementBuilder extends BaseBuilder {
         String nodeName = element.getName();
         SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
 
+        boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+        boolean flushCache = Boolean.parseBoolean(element.attributeValue("flushCache", String.valueOf(!isSelect)));
+        boolean useCache = Boolean.parseBoolean(element.attributeValue("useCache", String.valueOf(isSelect)));
+
         // 获取默认语言驱动器
         Class<?> langClass = configuration.getLanguageRegistry().getDefaultDriverClass();
         LanguageDriver langDriver = configuration.getLanguageRegistry().getDriver(langClass);
-        // 解析<selectKey>
+
+        // 解析<selectKey> step-14 新增
         processSelectKeyNodes(id, parameterTypeClass, langDriver);
+
+        // 解析成SqlSource，DynamicSqlSource/RawSqlSource
         SqlSource sqlSource = langDriver.createSqlSource(configuration, element, parameterTypeClass);
+
         // 属性标记【仅对 insert 有用】, MyBatis 会通过 getGeneratedKeys 或者通过 insert 语句的 selectKey 子元素设置它的值 step-14 新增
         String keyProperty = element.attributeValue("keyProperty");
 
@@ -77,27 +87,34 @@ public class XMLStatementBuilder extends BaseBuilder {
         } else {
             keyGenerator = configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType) ? new Jdbc3KeyGenerator() : new NoKeyGenerator();
         }
-        // 调用助手类【本节新添加，便于统一处理参数的包装】
+
+        // 调用助手类
         builderAssistant.addMappedStatement(id,
                 sqlSource,
                 sqlCommandType,
                 parameterTypeClass,
                 resultMap,
                 resultTypeClass,
+                flushCache,
+                useCache,
                 keyGenerator,
                 keyProperty,
                 langDriver);
+
     }
+
     private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
         List<Element> selectKeyNodes = element.elements("selectKey");
         parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver);
     }
+
     private void parseSelectKeyNodes(String parentId, List<Element> list, Class<?> parameterTypeClass, LanguageDriver languageDriver) {
         for (Element nodeToHandle : list) {
             String id = parentId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
             parseSelectKeyNode(id, nodeToHandle, parameterTypeClass, languageDriver);
         }
     }
+
     /**
      * <selectKey keyProperty="id" order="AFTER" resultType="long">
      * SELECT LAST_INSERT_ID()
@@ -111,6 +128,8 @@ public class XMLStatementBuilder extends BaseBuilder {
 
         // default
         String resultMap = null;
+        boolean flushCache = false;
+        boolean useCache = false;
         KeyGenerator keyGenerator = new NoKeyGenerator();
 
         // 解析成SqlSource，DynamicSqlSource/RawSqlSource
@@ -124,6 +143,8 @@ public class XMLStatementBuilder extends BaseBuilder {
                 parameterTypeClass,
                 resultMap,
                 resultTypeClass,
+                flushCache,
+                useCache,
                 keyGenerator,
                 keyProperty,
                 langDriver);
