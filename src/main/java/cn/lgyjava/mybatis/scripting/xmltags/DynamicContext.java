@@ -90,7 +90,7 @@ public class DynamicContext {
             }
 
             // 如果没找到，再用ognl表达式去取值
-            // 如person[0].birthdate.year
+            // school[0].class.user
             if (parameterMetaObject != null) {
                 // issue #61 do not modify the context when reading
                 return parameterMetaObject.getValue(strKey);
