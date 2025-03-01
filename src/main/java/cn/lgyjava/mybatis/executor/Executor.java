@@ -1,5 +1,6 @@
 package cn.lgyjava.mybatis.executor;
 
+import cn.lgyjava.mybatis.cache.CacheKey;
 import cn.lgyjava.mybatis.mapping.BoundSql;
 import cn.lgyjava.mybatis.mapping.MappedStatement;
 import cn.lgyjava.mybatis.session.ResultHandler;
@@ -20,8 +21,10 @@ public interface Executor {
 
     int update(MappedStatement ms, Object parameter) throws SQLException;
 
-    <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException;
+    // 查询，含缓存
+    <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException;
 
+    // 查询
     <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException;
 
     Transaction getTransaction();
@@ -31,5 +34,11 @@ public interface Executor {
     void rollback(boolean required) throws SQLException;
 
     void close(boolean forceRollback);
+
+    // 清理Session缓存
+    void clearLocalCache();
+
+    // 创建缓存 Key
+    CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
 
 }

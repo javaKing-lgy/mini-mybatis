@@ -25,13 +25,16 @@ public class MappedStatement {
     Class<?> resultType;
     private LanguageDriver lang;
     private List<ResultMap> resultMaps;
-    // step-14 新增
+    private boolean flushCacheRequired;
+
     private KeyGenerator keyGenerator;
     private String[] keyProperties;
     private String[] keyColumns;
+
     MappedStatement() {
         // constructor disabled
     }
+
     public BoundSql getBoundSql(Object parameterObject) {
         // 调用 SqlSource#getBoundSql
         return sqlSource.getBoundSql(parameterObject);
@@ -86,6 +89,7 @@ public class MappedStatement {
         }
 
     }
+
     private static String[] delimitedStringToArray(String in) {
         if (in == null || in.trim().length() == 0) {
             return null;
@@ -136,6 +140,10 @@ public class MappedStatement {
 
     public String getResource() {
         return resource;
+    }
+
+    public boolean isFlushCacheRequired() {
+        return flushCacheRequired;
     }
 
 }
