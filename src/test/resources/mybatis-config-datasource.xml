@@ -4,8 +4,28 @@
 
 <configuration>
 
+    <settings>
+        <!-- 全局缓存：true/false -->
+        <setting name="cacheEnabled" value="true"/>
+        <!--缓存级别：SESSION/STATEMENT-->
+        <setting name="localCacheScope" value="STATEMENT"/>
+    </settings>
+
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://127.0.0.1:3306/mybatis?useUnicode=true&amp;characterEncoding=utf8"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+
     <mappers>
-        <mapper resource="mapper/UserDao.xml"/>
+        <!-- XML 配置 -->
+        <mapper resource="mapper/Activity_Mapper.xml"/>
     </mappers>
 
 </configuration>
