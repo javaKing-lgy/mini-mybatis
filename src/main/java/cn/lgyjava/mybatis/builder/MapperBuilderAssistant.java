@@ -30,7 +30,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         this.resource = resource;
     }
 
-    // step-13 新增方法
+
     public ResultMapping buildResultMapping(
             Class<?> resultType,
             String property,
@@ -170,7 +170,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         statementBuilder.resultMaps(resultMaps);
     }
 
-    // step-13 新增方法
+
     public ResultMap addResultMap(String id, Class<?> type, List<ResultMapping> resultMappings) {
         // 补全ID全路径，如：cn.bugstack.mybatis.test.dao.IActivityDao + activityMap
         id = applyCurrentNamespace(id, false);

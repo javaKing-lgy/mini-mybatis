@@ -69,13 +69,13 @@ public class XMLStatementBuilder extends BaseBuilder {
         Class<?> langClass = configuration.getLanguageRegistry().getDefaultDriverClass();
         LanguageDriver langDriver = configuration.getLanguageRegistry().getDriver(langClass);
 
-        // 解析<selectKey> step-14 新增
+        // 解析<selectKey>
         processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
         // 解析成SqlSource，DynamicSqlSource/RawSqlSource
         SqlSource sqlSource = langDriver.createSqlSource(configuration, element, parameterTypeClass);
 
-        // 属性标记【仅对 insert 有用】, MyBatis 会通过 getGeneratedKeys 或者通过 insert 语句的 selectKey 子元素设置它的值 step-14 新增
+        // 属性标记【仅对 insert 有用】, MyBatis 会通过 getGeneratedKeys 或者通过 insert 语句的 selectKey 子元素设置它的值
         String keyProperty = element.attributeValue("keyProperty");
 
         KeyGenerator keyGenerator = null;

@@ -74,7 +74,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         // 2. 配置cache
         cacheElement(element.element("cache"));
 
-        // 3. 解析resultMap step-13 新增
+        // 3. 解析resultMap
         resultMapElements(element.elements("resultMap"));
 
         // 4.配置select|insert|update|delete

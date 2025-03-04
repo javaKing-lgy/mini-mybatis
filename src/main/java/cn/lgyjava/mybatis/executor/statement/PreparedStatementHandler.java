@@ -36,7 +36,7 @@ public class PreparedStatementHandler extends BaseStatementHandler{
     }
 
     /**
-     * step-11 新增修改方法
+     * 新增修改方法
      */
     @Override
     public int update(Statement statement) throws SQLException {

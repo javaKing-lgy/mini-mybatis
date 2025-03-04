@@ -72,7 +72,7 @@ public class MapperAnnotationBuilder {
             final String mappedStatementId = type.getName() + "." + method.getName();
             SqlCommandType sqlCommandType = getSqlCommandType(method);
 
-            // step-14 新增
+
             KeyGenerator keyGenerator;
             String keyProperty = "id";
             if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {

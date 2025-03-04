@@ -38,8 +38,8 @@ public abstract class BaseStatementHandler implements StatementHandler {
         this.mappedStatement = mappedStatement;
         this.rowBounds = rowBounds;
 
-        // step-11 新增判断，因为 update 不会传入 boundSql 参数，所以这里要做初始化处理
-        // step-14 添加 generateKeys
+        // 判断，因为 update 不会传入 boundSql 参数，所以这里要做初始化处理
+        // 添加 generateKeys
         if (boundSql == null) {
             generateKeys(parameterObject);
             boundSql = mappedStatement.getBoundSql(parameterObject);

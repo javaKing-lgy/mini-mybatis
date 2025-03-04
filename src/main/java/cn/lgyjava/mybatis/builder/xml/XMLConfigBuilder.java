@@ -52,7 +52,7 @@ public class XMLConfigBuilder extends BaseBuilder {
      */
     public Configuration parse() {
         try {
-            // 插件 step-16 添加
+            // 插件
             pluginElement(root.element("plugins"));
             // 设置
             settingsElement(root.element("settings"));

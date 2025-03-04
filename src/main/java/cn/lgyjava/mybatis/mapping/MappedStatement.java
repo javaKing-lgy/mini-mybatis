@@ -27,7 +27,7 @@ public class MappedStatement {
     private LanguageDriver lang;
     private List<ResultMap> resultMaps;
     private boolean flushCacheRequired;
-    // step-14 新增
+
     private KeyGenerator keyGenerator;
     private String[] keyProperties;
     private String[] keyColumns;
@@ -38,9 +38,7 @@ public class MappedStatement {
         // constructor disabled
     }
 
-    /**
-     * step-11 新增方法
-     */
+
     public BoundSql getBoundSql(Object parameterObject) {
         // 调用 SqlSource#getBoundSql
         return sqlSource.getBoundSql(parameterObject);
