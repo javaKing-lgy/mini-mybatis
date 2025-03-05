@@ -5,7 +5,11 @@
 然而，像我们新手学习这种框架的源码，其实是很困难的，但我们也要坚持学习下去，相信最后一定会有收获！  
 为了能够了解MyBatis框架的实现过程，同时也为了加深对MyBatis框架的理解，  
 我总结了我学习的MyBatis的知识，打算从零到一手写一个MyBatis ORM框架(简易版，没有完全实现)，  
-从中体会MyBatis的实现的过程。  
+从中体会MyBatis的实现的过程。 
+## 框架功能
+
+## 框架流程图
+![流程图](./doc/img/mybatis-mini.png)
 ## 文档
 文档在这里  
 https://github.com/javaKing-lgy/douyu-live-app/tree/master/doc
