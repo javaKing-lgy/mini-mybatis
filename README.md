@@ -7,7 +7,8 @@
 我总结了我学习的MyBatis的知识，打算从零到一手写一个MyBatis ORM框架(简易版，没有完全实现)，  
 从中体会MyBatis的实现的过程。  
 ## 文档
-
+文档在这里  
+https://github.com/javaKing-lgy/douyu-live-app/tree/master/doc
 ## 目录结构
 java  
 └── cn  
