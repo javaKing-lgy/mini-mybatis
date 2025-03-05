@@ -9,11 +9,30 @@
 ## 文档
 
 ## 目录结构
+java
+└── cn
+    └── lgyjava
+        └── mybatis
+            ├── annotations
+            ├── binding
+            ├── builder
+            ├── cache
+            ├── datasource
+            ├── executor
+            ├── io
+            ├── mapping
+            ├── parsing
+            ├── plugin
+            ├── reflection
+            ├── scripting
+            ├── session
+            ├── transaction
+            └── type
 
 ## 最后
 关于这部分全部的知识，大家可以到官网查看 https://mybatis.org/mybatis-3/zh_CN/index.html 
 我也推荐 小傅哥 我从他的Mybatis手撸专栏中也学到了很多很多  https://bugstack.cn/md/about/me/about-me.html 
-
+学习java 我只看 小傅哥。
 ## 你的点赞鼓励，是我前进的动力~
 
 ## 你的点赞鼓励，是我前进的动力~
