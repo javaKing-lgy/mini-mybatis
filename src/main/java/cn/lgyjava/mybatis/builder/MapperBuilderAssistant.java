@@ -105,7 +105,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
             String keyProperty,
             LanguageDriver lang
     ) {
-        // 给id加上namespace前缀：cn.bugstack.mybatis.test.dao.IUserDao.queryUserInfoById
+        // 给id加上namespace前缀：cn.lgyjava.mybatis.test.dao.IUserDao.queryUserInfoById
         id = applyCurrentNamespace(id, false);
         //是否是select语句
         boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
@@ -156,7 +156,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
         /*
          * 通常使用 resultType 即可满足大部分场景
-         * <select id="queryUserInfoById" resultType="cn.bugstack.mybatis.test.po.User">
+         * <select id="queryUserInfoById" resultType="cn.lgyjava.mybatis.test.po.User">
          * 使用 resultType 的情况下，Mybatis 会自动创建一个 ResultMap，基于属性名称映射列到 JavaBean 的属性上。
          */
         else if (resultType != null) {
@@ -172,7 +172,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
 
     public ResultMap addResultMap(String id, Class<?> type, List<ResultMapping> resultMappings) {
-        // 补全ID全路径，如：cn.bugstack.mybatis.test.dao.IActivityDao + activityMap
+        // 补全ID全路径，如：cn.lgyjava.mybatis.test.dao.IActivityDao + activityMap
         id = applyCurrentNamespace(id, false);
 
         ResultMap.Builder inlineResultMapBuilder = new ResultMap.Builder(
@@ -197,7 +197,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         typeClass = valueOrDefault(typeClass, PerpetualCache.class);
         evictionClass = valueOrDefault(evictionClass, FifoCache.class);
 
-        // 建造者模式构建 Cache [currentNamespace=cn.bugstack.mybatis.test.dao.IActivityDao]
+        // 建造者模式构建 Cache [currentNamespace=cn.lgyjava.mybatis.test.dao.IActivityDao]
         Cache cache = new CacheBuilder(currentNamespace)
                 .implementation(typeClass)
                 .addDecorator(evictionClass)

@@ -121,7 +121,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
 
     /**
-     * <resultMap id="activityMap" type="cn.bugstack.mybatis.test.po.Activity">
+     * <resultMap id="activityMap" type="cn.lgyjava.mybatis.test.po.Activity">
      * <id column="id" property="id"/>
      * <result column="activity_id" property="activityId"/>
      * <result column="activity_name" property="activityName"/>

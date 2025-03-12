@@ -69,7 +69,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     /**
      * Mybatis 允许你在某一点切入映射语句执行的调度
      * <plugins>
-     * <plugin interceptor="cn.bugstack.mybatis.test.plugin.TestPlugin">
+     * <plugin interceptor="cn.lgyjava.mybatis.test.plugin.TestPlugin">
      * <property name="test00" value="100"/>
      * <property name="test01" value="100"/>
      * </plugin>
@@ -86,7 +86,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             for (Element property : propertyElementList) {
                 properties.setProperty(property.attributeValue("name"), property.attributeValue("value"));
             }
-            // 获取插件实现类并实例化：cn.bugstack.mybatis.test.plugin.TestPlugin
+            // 获取插件实现类并实例化：cn.lgyjava.mybatis.test.plugin.TestPlugin
             Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).newInstance();
             interceptorInstance.setProperties(properties);
             configuration.addInterceptor(interceptorInstance);
@@ -164,7 +164,7 @@ public class XMLConfigBuilder extends BaseBuilder {
      *	 <mapper resource="org/mybatis/builder/BlogMapper.xml"/>
      *	 <mapper resource="org/mybatis/builder/PostMapper.xml"/>
      *
-     *   <mapper class="cn.bugstack.mybatis.test.dao.IUserDao"/>
+     *   <mapper class="cn.lgyjava.mybatis.test.dao.IUserDao"/>
      * </mappers>
      */
     private void mapperElement(Element mappers) throws Exception {
