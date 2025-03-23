@@ -4,15 +4,37 @@
 在面试中，MyBatis相关的问题也是屡见不鲜。  
 然而，像我们新手学习这种框架的源码，其实是很困难的，但我们也要坚持学习下去，相信最后一定会有收获！  
 为了能够了解MyBatis框架的实现过程，同时也为了加深对MyBatis框架的理解，  
-我总结了我学习的MyBatis的知识，打算从零到一手写一个MyBatis ORM框架(简易版，没有完全实现)，  
+我总结了我学习的MyBatis的知识，打算从零到一手写一个MyBatis ORM框架，  
 从中体会MyBatis的实现的过程。 
 ## 框架功能
 
 ## 框架流程图
-![流程图](./doc/img/mybatis-mini.png)
+### mini-mybatis最全流程
+![流程图](./doc/img/mini-mybatis.png)
+
+### mini-mybatis-获取代理对象后的执行流程.drawio.png
+![代理执行流程](./doc/img/mini-mybatis-获取代理对象后的执行流程.drawio.png)
+
+### mini-mybatis-结果集处理.png
+![结果集处理](./doc/img/mini-mybatis-结果集处理.drawio.png)
+
+### mini-mybatis-插件运行流程
+![插件运行流程](./doc/img/mini-mybatis-插件运行流程.png)
+
+### mini-mybatis-缓存执行流程.png
+![插件运行流程](.doc/img/mini-mybatis-缓存执行流程.png)
+
+### mini-mybatis-一级缓存
+![一级缓存](./doc/img/mini-mybatis-一级缓存.drawio.png)
+
+### mini-mybatis-二级缓存
+![二级缓存](./doc/img/mini-mybatis-二级缓存.png)
+
+### mini-mybatis-总流程梳理.png
+![总流程](./doc/img/mini-mybatis-总流程梳理.png)
 ## 文档
 文档在这里  
-https://github.com/javaKing-lgy/douyu-live-app/tree/master/doc
+https://github.com/javaKing-lgy/mini-mybatis/tree/master/doc
 ## 目录结构
 java  
 └── cn  
@@ -44,5 +66,4 @@ java
 
 ## 你的点赞鼓励，是我前进的动力~
 
-## 
 
